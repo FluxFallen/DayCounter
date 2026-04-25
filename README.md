@@ -1,9 +1,15 @@
-# daycounter
+# Day Counter
 
-## Setup
+Simple Fabric mod that displays the current Minecraft day as a movable HUD element.
 
-For setup instructions, please see the [Fabric Documentation page](https://docs.fabricmc.net/develop/getting-started/creating-a-project#setting-up) related to the IDE that you are using.
+## Features
+- Displays current day
+- Drag to reposition
+- Alignment guides
+- Position saved automatically
+
+## Controls
+- Press `M` to edit position
 
 ## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+MIT
