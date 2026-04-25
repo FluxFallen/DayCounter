@@ -2,10 +2,10 @@
 	"schemaVersion": 1,
 	"id": "daycounter",
 	"version": "${version}",
-	"name": "daycounter",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Day Counter",
+	"description": "Displays the current Minecraft day with a movable HUD.",
 	"authors": [
-		"Me!"
+		"Flux"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
@@ -19,7 +19,7 @@
 			"com.flux.daycounter.Daycounter"
 		],
 		"client": [
-			"com.flux.daycounter.client.DaycounterClient"
+			"com.flux.daycounter.client.DayCounterClient"
 		]
 	},
 	"mixins": [
