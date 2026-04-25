@@ -1,16 +1,17 @@
 package com.flux.daycounter.client;
 
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 public class DayCounterEditScreen extends Screen {
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         String text = "Day 1";
-        int width = this.textRenderer.getWidth(text);
-        int height = this.textRenderer.fontHeight;
+        int width = this.font.width(text);
+        int height = this.font.lineHeight;
 
         double mouseX = click.x();
         double mouseY = click.y();
@@ -32,7 +33,7 @@ public class DayCounterEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(@NonNull MouseButtonEvent click, double offsetX, double offsetY) {
         if (dragging && click.button() == 0) {
             x = (int) click.x() - dragOffsetX;
             y = (int) click.y() - dragOffsetY;
@@ -45,7 +46,7 @@ public class DayCounterEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (click.button() == 0 && dragging) {
             dragging = false;
             clampToScreen();
@@ -57,8 +58,8 @@ public class DayCounterEditScreen extends Screen {
 
     private void applyGuides() {
         String text = "Day 1";
-        int textWidth = this.textRenderer.getWidth(text);
-        int textHeight = this.textRenderer.fontHeight;
+        int textWidth = this.font.width(text);
+        int textHeight = this.font.lineHeight;
 
         int snapDistance = 6;
 
@@ -91,14 +92,14 @@ public class DayCounterEditScreen extends Screen {
     private int dragOffsetY;
 
     protected DayCounterEditScreen(int startX, int startY, PositionCallback callback) {
-        super(Text.literal("Edit Day Counter"));
+        super(Component.literal("Edit Day Counter"));
         this.x = startX;
         this.y = startY;
         this.callback = callback;
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         context.fill(
                 0,
                 0,
@@ -108,8 +109,8 @@ public class DayCounterEditScreen extends Screen {
         );
 
         String text = "Day 1";
-        int textWidth = this.textRenderer.getWidth(text);
-        int textHeight = this.textRenderer.fontHeight;
+        int textWidth = this.font.width(text);
+        int textHeight = this.font.lineHeight;
 
         int elementCenterX = x + textWidth / 2;
         int elementCenterY = y + textHeight / 2;
@@ -125,16 +126,16 @@ public class DayCounterEditScreen extends Screen {
             context.fill(0, screenCenterY, this.width, screenCenterY + 1, 0x88FFFFFF);
         }
 
-        context.drawTextWithShadow(
-                this.textRenderer,
+        context.drawString(
+                this.font,
                 text,
                 x,
                 y,
                 0xFFFFFFFF
         );
 
-        context.drawTextWithShadow(
-                this.textRenderer,
+        context.drawString(
+                this.font,
                 "Drag to move. Guides appear when centered. Press Esc to save.",
                 10,
                 10,
@@ -145,15 +146,15 @@ public class DayCounterEditScreen extends Screen {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         callback.updatePosition(x, y);
-        super.close();
+        super.onClose();
     }
 
     private void clampToScreen() {
         String text = "Day 1";
-        int textWidth = this.textRenderer.getWidth(text);
-        int textHeight = this.textRenderer.fontHeight;
+        int textWidth = this.font.width(text);
+        int textHeight = this.font.lineHeight;
 
         x = Math.max(0, Math.min(x, this.width - textWidth));
         y = Math.max(0, Math.min(y, this.height - textHeight));

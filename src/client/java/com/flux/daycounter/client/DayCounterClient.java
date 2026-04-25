@@ -2,25 +2,24 @@ package com.flux.daycounter.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Colors;
-
 // Keybind Imports
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.file.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.blaze3d.platform.InputConstants;
 
 
 public class DayCounterClient implements ClientModInitializer {
@@ -29,10 +28,10 @@ public class DayCounterClient implements ClientModInitializer {
 	private int x = 10;
 	private int y = 10;
 
-	private KeyBinding toggleMoveMode;
+	private KeyMapping toggleMoveMode;
 
-	private static final KeyBinding.Category DAYCOUNTER_CATEGORY =
-			KeyBinding.Category.create(Identifier.of(MOD_ID, "daycounter"));
+	private static final KeyMapping.Category DAYCOUNTER_CATEGORY =
+			KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "daycounter"));
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static final Path CONFIG_PATH =
@@ -44,16 +43,16 @@ public class DayCounterClient implements ClientModInitializer {
 		//load config:
 		loadConfig();
 		//register keybinds
-		toggleMoveMode = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		toggleMoveMode = KeyBindingHelper.registerKeyBinding(new KeyMapping(
 				"key.daycounter.toggle_move",
-				InputUtil.Type.KEYSYM,
+				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_M,
 				DAYCOUNTER_CATEGORY
 		));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			while (toggleMoveMode.wasPressed()) {
-				if (client.currentScreen == null) {
+			while (toggleMoveMode.consumeClick()) {
+				if (client.screen == null) {
 					client.setScreen(new DayCounterEditScreen(x, y, (newX, newY) -> {
 						this.x = newX;
 						this.y = newY;
@@ -62,42 +61,38 @@ public class DayCounterClient implements ClientModInitializer {
 				}
 			}
 
-			if (client.getWindow() != null) {
-				int screenWidth = client.getWindow().getScaledWidth();
-				int screenHeight = client.getWindow().getScaledHeight();
+            int screenWidth = client.getWindow().getGuiScaledWidth();
+            int screenHeight = client.getWindow().getGuiScaledHeight();
 
-				int textWidth = client.textRenderer.getWidth("Day 99999"); // safe max size
+            int textWidth = client.font.width("Day 99999"); // safe max size
 
-				x = Math.max(0, Math.min(x, screenWidth - textWidth));
-				y = Math.max(0, Math.min(y, screenHeight - 20));
-			}
+            x = Math.max(0, Math.min(x, screenWidth - textWidth));
+            y = Math.max(0, Math.min(y, screenHeight - 20));
 
 
-		});
+        });
 
 		HudElementRegistry.addLast(
-				Identifier.of(MOD_ID, "day_counter"),
+				Identifier.fromNamespaceAndPath(MOD_ID, "day_counter"),
 				(drawContext, tickCounter) -> renderDayCounter(drawContext)
 		);
 	}
 
-	private void renderDayCounter(DrawContext drawContext) {
-		MinecraftClient client = MinecraftClient.getInstance();
+	private void renderDayCounter(GuiGraphics drawContext) {
+		Minecraft client = Minecraft.getInstance();
 
-		if (client == null) return;
-
-		var world = client.world;
+        var world = client.level;
 		if (world == null || client.player == null) return;
 
-		long minecraftDay = (world.getTimeOfDay() / 24000L) + 1;
+		long minecraftDay = (world.getDayTime() / 24000L) + 1;
 		String text = "Day " + minecraftDay;
 
-		drawContext.drawTextWithShadow(
-				client.textRenderer,
+		drawContext.drawString(
+				client.font,
 				text,
 				x,
 				y,
-				Colors.WHITE
+				CommonColors.WHITE
 		);
 	}
 
