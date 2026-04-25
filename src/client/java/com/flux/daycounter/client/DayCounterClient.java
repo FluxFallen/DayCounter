@@ -2,25 +2,25 @@ package com.flux.daycounter.client;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-// Keybind Imports
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import org.lwjgl.glfw.GLFW;
-
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 import net.fabricmc.loader.api.FabricLoader;
+
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.CommonColors;
-import java.nio.file.Path;
-import java.io.IOException;
-import java.nio.file.Files;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
 
+import org.lwjgl.glfw.GLFW;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class DayCounterClient implements ClientModInitializer {
 	public static final String MOD_ID = "daycounter";
@@ -34,16 +34,15 @@ public class DayCounterClient implements ClientModInitializer {
 			KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "daycounter"));
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
 	private static final Path CONFIG_PATH =
 			FabricLoader.getInstance().getConfigDir().resolve("daycounter.json");
 
 	@Override
 	public void onInitializeClient() {
-
-		//load config:
 		loadConfig();
-		//register keybinds
-		toggleMoveMode = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+
+		toggleMoveMode = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 				"key.daycounter.toggle_move",
 				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_M,
@@ -61,38 +60,37 @@ public class DayCounterClient implements ClientModInitializer {
 				}
 			}
 
-            int screenWidth = client.getWindow().getGuiScaledWidth();
-            int screenHeight = client.getWindow().getGuiScaledHeight();
+			int screenWidth = client.getWindow().getGuiScaledWidth();
+			int screenHeight = client.getWindow().getGuiScaledHeight();
 
-            int textWidth = client.font.width("Day 99999"); // safe max size
+			int textWidth = client.font.width("Day 99999");
 
-            x = Math.max(0, Math.min(x, screenWidth - textWidth));
-            y = Math.max(0, Math.min(y, screenHeight - 20));
-
-
-        });
+			x = Math.max(0, Math.min(x, screenWidth - textWidth));
+			y = Math.max(0, Math.min(y, screenHeight - 20));
+		});
 
 		HudElementRegistry.addLast(
 				Identifier.fromNamespaceAndPath(MOD_ID, "day_counter"),
-				(drawContext, tickCounter) -> renderDayCounter(drawContext)
+				(graphics, _) -> renderDayCounter(graphics)
 		);
 	}
 
-	private void renderDayCounter(GuiGraphics drawContext) {
+	private void renderDayCounter(GuiGraphicsExtractor graphics) {
 		Minecraft client = Minecraft.getInstance();
 
-        var world = client.level;
+		var world = client.level;
 		if (world == null || client.player == null) return;
 
-		long minecraftDay = (world.getDayTime() / 24000L) + 1;
+		long minecraftDay = (world.getGameTime() / 24000L) + 1;
 		String text = "Day " + minecraftDay;
 
-		drawContext.drawString(
+		graphics.text(
 				client.font,
 				text,
 				x,
 				y,
-				CommonColors.WHITE
+				0xFFFFFFFF,
+				true
 		);
 	}
 
@@ -106,6 +104,7 @@ public class DayCounterClient implements ClientModInitializer {
 			if (Files.exists(CONFIG_PATH)) {
 				String json = Files.readString(CONFIG_PATH);
 				Config config = GSON.fromJson(json, Config.class);
+
 				if (config != null) {
 					this.x = config.x;
 					this.y = config.y;
@@ -122,8 +121,7 @@ public class DayCounterClient implements ClientModInitializer {
 			config.x = this.x;
 			config.y = this.y;
 
-			String json = GSON.toJson(config);
-			Files.writeString(CONFIG_PATH, json);
+			Files.writeString(CONFIG_PATH, GSON.toJson(config));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

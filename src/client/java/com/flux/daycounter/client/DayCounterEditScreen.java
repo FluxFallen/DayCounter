@@ -1,12 +1,32 @@
 package com.flux.daycounter.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
 public class DayCounterEditScreen extends Screen {
+    public interface PositionCallback {
+        void updatePosition(int x, int y);
+    }
+
+    private final PositionCallback callback;
+
+    private int x;
+    private int y;
+
+    private boolean dragging = false;
+    private int dragOffsetX;
+    private int dragOffsetY;
+
+    protected DayCounterEditScreen(int startX, int startY, PositionCallback callback) {
+        super(Component.literal("Edit Day Counter"));
+        this.x = startX;
+        this.y = startY;
+        this.callback = callback;
+    }
+
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         String text = "Day 1";
@@ -56,6 +76,61 @@ public class DayCounterEditScreen extends Screen {
         return super.mouseReleased(click);
     }
 
+    @Override
+    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
+
+        graphics.fill(
+                0,
+                0,
+                this.width,
+                this.height,
+                0x88000000
+        );
+
+        String text = "Day 1";
+        int textWidth = this.font.width(text);
+        int textHeight = this.font.lineHeight;
+
+        int elementCenterX = x + textWidth / 2;
+        int elementCenterY = y + textHeight / 2;
+
+        int screenCenterX = this.width / 2;
+        int screenCenterY = this.height / 2;
+
+        if (Math.abs(elementCenterX - screenCenterX) <= 6) {
+            graphics.fill(screenCenterX, 0, screenCenterX + 1, this.height, 0x88FFFFFF);
+        }
+
+        if (Math.abs(elementCenterY - screenCenterY) <= 6) {
+            graphics.fill(0, screenCenterY, this.width, screenCenterY + 1, 0x88FFFFFF);
+        }
+
+        graphics.text(
+                this.font,
+                text,
+                x,
+                y,
+                0xFFFFFFFF,
+                true
+        );
+
+        graphics.text(
+                this.font,
+                "Drag to move. Guides appear when centered. Press Esc to save.",
+                10,
+                10,
+                0xFFAAAAAA,
+                true
+        );
+    }
+
+    @Override
+    public void onClose() {
+        callback.updatePosition(x, y);
+        super.onClose();
+    }
+
     private void applyGuides() {
         String text = "Day 1";
         int textWidth = this.font.width(text);
@@ -76,79 +151,6 @@ public class DayCounterEditScreen extends Screen {
         if (Math.abs(elementCenterY - screenCenterY) <= snapDistance) {
             y = screenCenterY - textHeight / 2;
         }
-    }
-
-    public interface PositionCallback {
-        void updatePosition(int x, int y);
-    }
-
-    private final PositionCallback callback;
-
-    private int x;
-    private int y;
-
-    private boolean dragging = false;
-    private int dragOffsetX;
-    private int dragOffsetY;
-
-    protected DayCounterEditScreen(int startX, int startY, PositionCallback callback) {
-        super(Component.literal("Edit Day Counter"));
-        this.x = startX;
-        this.y = startY;
-        this.callback = callback;
-    }
-
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        context.fill(
-                0,
-                0,
-                this.width,
-                this.height,
-                0x88000000
-        );
-
-        String text = "Day 1";
-        int textWidth = this.font.width(text);
-        int textHeight = this.font.lineHeight;
-
-        int elementCenterX = x + textWidth / 2;
-        int elementCenterY = y + textHeight / 2;
-
-        int screenCenterX = this.width / 2;
-        int screenCenterY = this.height / 2;
-
-        if (Math.abs(elementCenterX - screenCenterX) <= 6) {
-            context.fill(screenCenterX, 0, screenCenterX + 1, this.height, 0x88FFFFFF);
-        }
-
-        if (Math.abs(elementCenterY - screenCenterY) <= 6) {
-            context.fill(0, screenCenterY, this.width, screenCenterY + 1, 0x88FFFFFF);
-        }
-
-        context.drawString(
-                this.font,
-                text,
-                x,
-                y,
-                0xFFFFFFFF
-        );
-
-        context.drawString(
-                this.font,
-                "Drag to move. Guides appear when centered. Press Esc to save.",
-                10,
-                10,
-                0xFFAAAAAA
-        );
-
-        super.render(context, mouseX, mouseY, delta);
-    }
-
-    @Override
-    public void onClose() {
-        callback.updatePosition(x, y);
-        super.onClose();
     }
 
     private void clampToScreen() {
