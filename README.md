@@ -106,7 +106,7 @@ If you encounter bugs or have suggestions:
 
 ## Downloads
 
-* Modrinth: [Add link here](https://modrinth.com/mod/day-counter-overlay)
+* Modrinth: [Day Counter](https://modrinth.com/mod/day-counter-overlay)
 
 ---
 
