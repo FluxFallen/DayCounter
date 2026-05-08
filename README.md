@@ -2,8 +2,6 @@
 
 A lightweight and customizable Fabric client-side HUD mod that displays the current Minecraft day directly on your screen.
 
-Perfect for survival worlds, long-term projects, hardcore runs, and technical gameplay where keeping track of time matters.
-
 ---
 
 ## Features
@@ -34,7 +32,7 @@ Perfect for survival worlds, long-term projects, hardcore runs, and technical ga
 
 | Action          | Default Key |
 | --------------- | ----------- |
-| Open HUD Editor | Right Shift |
+| Open HUD Editor |      M      |
 
 The HUD editor allows you to drag the Day Counter anywhere on your screen.
 
@@ -103,15 +101,12 @@ You are free to use, modify, and distribute this project under the terms of the 
 If you encounter bugs or have suggestions:
 
 * Open an issue on GitHub
-* Submit a pull request
-* Leave feedback on Modrinth
 
 ---
 
 ## Downloads
 
-* Modrinth: Add link here
-* GitHub Releases: Add link here
+* Modrinth: [Add link here](https://modrinth.com/mod/day-counter-overlay)
 
 ---
 
